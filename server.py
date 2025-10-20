@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask
 import pandas as pd
 import plotly.express as px
 import os
@@ -25,10 +25,10 @@ df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
 # ---------- GENERACIÓN DE FIGURAS ----------
 def make_dashboard():
-    # Muestras limitadas para rendimiento
+    # Limitamos filas para mejorar rendimiento
     df_sample = df.sample(min(len(df), 3000), random_state=42)
 
-    # Scatter RPM vs Torque
+    # Gráfico 1: RPM vs Torque
     fig1 = px.scatter(
         df_sample,
         x="RPM",
@@ -39,7 +39,7 @@ def make_dashboard():
     )
     fig1_html = fig1.to_html(full_html=False)
 
-    # Boxplot ToolWear por estado Target
+    # Gráfico 2: Desgaste de herramienta
     fig2 = px.box(
         df,
         x="Target",
@@ -49,7 +49,7 @@ def make_dashboard():
     )
     fig2_html = fig2.to_html(full_html=False)
 
-    # Barras de tipos de fallo
+    # Gráfico 3: Tipos de fallo (si existe la columna)
     if "FailureType" in df.columns:
         fail_counts = df["FailureType"].value_counts().reset_index()
         fail_counts.columns = ["FailureType", "count"]
@@ -64,7 +64,6 @@ def make_dashboard():
     else:
         fig3_html = "<p>No hay columna 'FailureType' en los datos.</p>"
 
-    # Devolvemos todo como un diccionario de HTML embebido
     return {
         "fig1": fig1_html,
         "fig2": fig2_html,
@@ -101,7 +100,8 @@ def dashboard():
     </body>
     </html>
     """
-    return render_template_string(html)
+    # 🔹 devolvemos directamente el HTML (sin Jinja)
+    return html
 
 
 # ---------- EJECUCIÓN ----------
